@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#111111" />
+  <meta name="description" content="個人用タスク管理PWA（ローカル保存）" />
+
+  <!-- 可能な範囲でXSS耐性を上げる（GitHub Pagesではヘッダ設定が難しいのでmetaで） -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data:; style-src 'self'; script-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests">
+
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="stylesheet" href="./styles.css" />
+  <title>Task PWA</title>
+</head>
+
+<body>
+  <header class="header">
+    <h1 class="title">Task PWA</h1>
+    <p class="subtitle">端末内保存（この段階では同期なし）</p>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <form id="addForm" class="row" autocomplete="off">
+        <div class="grow">
+          <label class="label" for="titleInput">タスク</label>
+          <input id="titleInput" class="input" type="text" maxlength="120" placeholder="例：WISS原稿の図を差し替える" required />
+        </div>
+
+        <div class="col">
+          <label class="label" for="dueInput">期限（任意）</label>
+          <input id="dueInput" class="input" type="datetime-local" />
+        </div>
+
+        <button class="button primary" type="submit">追加</button>
+      </form>
+
+      <div class="toolbar">
+        <div class="seg">
+          <button type="button" class="segbtn" data-filter="all" aria-pressed="true">すべて</button>
+          <button type="button" class="segbtn" data-filter="active" aria-pressed="false">未完了</button>
+          <button type="button" class="segbtn" data-filter="done" aria-pressed="false">完了</button>
+        </div>
+
+        <div class="grow">
+          <label class="sr" for="searchInput">検索</label>
+          <input id="searchInput" class="input" type="search" placeholder="検索…" />
+        </div>
+
+        <div class="col">
+          <label class="label" for="sortSelect">並び</label>
+          <select id="sortSelect" class="input">
+            <option value="due">期限が近い順</option>
+            <option value="created_desc">新しい順</option>
+            <option value="created_asc">古い順</option>
+          </select>
+        </div>
+      </div>
+
+      <ul id="list" class="list" aria-label="タスク一覧"></ul>
+
+      <div class="footerbar">
+        <div class="left">
+          <span id="stats" class="muted"></span>
+        </div>
+
+        <div class="right">
+          <button id="exportBtn" type="button" class="button">書き出し(JSON)</button>
+
+          <label class="button filebtn" for="importFile">読み込み(JSON)</label>
+          <input id="importFile" class="file" type="file" accept="application/json" />
+
+          <button id="clearDoneBtn" type="button" class="button danger">完了を削除</button>
+        </div>
+      </div>
+
+      <p class="note">
+        ※ iPhoneで“アプリっぽく”使う：Safariで開く → 共有 →「ホーム画面に追加」。<br>
+        ※ 通知（締切で自動Push）や端末間の自動同期は、GitHub Pages単体では完結しないので次の段階で追加します。
+      </p>
+    </section>
+  </main>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>

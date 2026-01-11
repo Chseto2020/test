@@ -1,0 +1,192 @@
+:root{
+  --bg:#0b0b0c;
+  --card:#121214;
+  --text:#e9e9ea;
+  --muted:#a7a7ab;
+  --line:#2a2a2e;
+  --primary:#2f7bf6;
+  --danger:#e04848;
+  --radius:14px;
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", sans-serif;
+  background: radial-gradient(1200px 800px at 20% 0%, #141418 0%, var(--bg) 55%);
+  color:var(--text);
+}
+
+.header{
+  padding:24px 16px 8px;
+  text-align:center;
+}
+.title{ margin:0; font-size:28px; letter-spacing:0.3px; }
+.subtitle{ margin:6px 0 0; color:var(--muted); font-size:14px; }
+
+.container{
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 12px 16px 40px;
+}
+
+.card{
+  background: rgba(18,18,20,0.9);
+  border:1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  backdrop-filter: blur(10px);
+}
+
+.row{
+  display:flex;
+  gap:12px;
+  align-items:flex-end;
+  flex-wrap: wrap;
+}
+
+.toolbar{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.footerbar{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:center;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.left,.right{ display:flex; gap:10px; align-items:center; flex-wrap: wrap; }
+
+.label{ display:block; font-size:12px; color:var(--muted); margin:0 0 6px; }
+.input{
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #0f0f12;
+  color: var(--text);
+  outline: none;
+}
+.input:focus{ border-color: rgba(47,123,246,0.65); box-shadow: 0 0 0 3px rgba(47,123,246,0.18); }
+
+.grow{ flex:1 1 280px; }
+.col{ flex: 0 0 210px; }
+
+.button{
+  border:1px solid var(--line);
+  background:#16161a;
+  color:var(--text);
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor:pointer;
+  user-select:none;
+  white-space:nowrap;
+}
+.button:hover{ filter: brightness(1.07); }
+.button:active{ transform: translateY(1px); }
+.primary{ background: rgba(47,123,246,0.2); border-color: rgba(47,123,246,0.55); }
+.danger{ background: rgba(224,72,72,0.16); border-color: rgba(224,72,72,0.55); }
+
+.seg{
+  display:inline-flex;
+  border:1px solid var(--line);
+  border-radius: 999px;
+  overflow:hidden;
+}
+.segbtn{
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  padding: 10px 12px;
+  cursor:pointer;
+}
+.segbtn[aria-pressed="true"]{
+  background:#1b1b20;
+  color:var(--text);
+}
+
+.list{
+  list-style:none;
+  padding:0;
+  margin: 14px 0 0;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.item{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  padding: 12px;
+  border:1px solid var(--line);
+  border-radius: 14px;
+  background:#0f0f12;
+}
+.check{
+  margin-top: 4px;
+  width: 18px; height: 18px;
+}
+.itemmain{ flex:1; min-width: 0; }
+.itemtitle{
+  margin:0;
+  font-size: 15px;
+  line-height: 1.35;
+  word-break: break-word;
+}
+.itemmeta{
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+  display:flex;
+  gap:10px;
+  flex-wrap: wrap;
+}
+.badge{
+  display:inline-flex;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border:1px solid var(--line);
+  background:#15151a;
+}
+.overdue{ border-color: rgba(224,72,72,0.6); background: rgba(224,72,72,0.12); color: #ffb3b3; }
+
+.itemactions{ display:flex; gap:8px; align-items:center; }
+.iconbtn{
+  border:1px solid var(--line);
+  background:#15151a;
+  color:var(--text);
+  border-radius: 12px;
+  padding: 8px 10px;
+  cursor:pointer;
+}
+.iconbtn:hover{ filter:brightness(1.07); }
+.iconbtn.danger{ background: rgba(224,72,72,0.16); }
+
+.muted{ color: var(--muted); }
+.note{
+  margin: 14px 2px 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.file{ display:none; }
+.filebtn{ display:inline-flex; align-items:center; justify-content:center; }
+
+.sr{
+  position:absolute;
+  width:1px;height:1px;
+  padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0,0,0,0);
+  white-space:nowrap;border:0;
+}

@@ -1,0 +1,11 @@
+{
+  "name": "Task PWA",
+  "short_name": "TaskPWA",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0b0c",
+  "theme_color": "#111111",
+  "description": "個人用タスク管理PWA（ローカル保存）",
+  "icons": []
+}
