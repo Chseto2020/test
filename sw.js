@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "taskpwa-cache-v2"; // ← ここを v3, v4…と増やすと強制更新できます
+const CACHE_NAME = "taskpwa-cache"; // 変更不要：ネット優先で更新する方針
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -19,8 +19,6 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(keys.map((k) => (k === CACHE_NAME ? Promise.resolve() : caches.delete(k))));
     await self.clients.claim();
   })());
 });
