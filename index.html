@@ -2,13 +2,9 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#111111" />
   <meta name="description" content="個人用タスク管理PWA（ローカル保存）" />
-
-  <!-- 可能な範囲でXSS耐性を上げる（GitHub Pagesではヘッダ設定が難しいのでmetaで） -->
-  <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data:; style-src 'self'; script-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests">
 
   <link rel="manifest" href="./manifest.json" />
   <link rel="stylesheet" href="./styles.css" />
@@ -16,74 +12,214 @@
 </head>
 
 <body>
-  <header class="header">
-    <h1 class="title">Task PWA</h1>
-    <p class="subtitle">端末内保存（この段階では同期なし）</p>
+  <header class="topbar">
+    <div class="topbar__left">
+      <div class="datepill">
+        <div class="datepill__date" id="dateLabel">--/--</div>
+        <div class="datepill__weekday" id="weekdayLabel">---</div>
+      </div>
+      <div class="timepill" id="timeLabel">--:--</div>
+    </div>
+
+    <div class="topbar__right">
+      <div class="stat">
+        <span class="stat__icon" aria-hidden="true">💎</span>
+        <span class="stat__value" id="gemCount">0</span>
+      </div>
+
+      <button class="stat stat--button" id="coinBtn" type="button" aria-label="所持金を更新">
+        <span class="stat__icon" aria-hidden="true">🪙</span>
+        <span class="stat__value" id="coinCount">0</span>
+      </button>
+
+      <button class="iconbtn" id="menuBtn" type="button" aria-label="メニュー">
+        ☰
+      </button>
+    </div>
   </header>
 
-  <main class="container">
-    <section class="card">
-      <form id="addForm" class="row" autocomplete="off">
-        <div class="grow">
-          <label class="label" for="titleInput">タスク</label>
-          <input id="titleInput" class="input" type="text" maxlength="120" placeholder="例：食事" required />
-        </div>
+  <nav class="tabs" aria-label="表示切り替え">
+    <button class="tab is-active" type="button" data-view="DAY">Day</button>
+    <button class="tab" type="button" data-view="WEEK">Week</button>
+    <button class="tab" type="button" data-view="MONTH">Month</button>
+  </nav>
 
-        <div class="col">
-          <label class="label" for="dueInput">期限（任意）</label>
-          <input id="dueInput" class="input" type="datetime-local" />
-        </div>
+  <main class="main">
+    <section class="panel">
+      <button class="addcard" id="openAddBtn" type="button">
+        <span class="addcard__plus">＋</span>
+      </button>
 
-        <button class="button primary" type="submit">追加</button>
-      </form>
+      <ul class="tasklist" id="taskList" aria-label="タスク一覧"></ul>
 
-      <div class="toolbar">
-        <div class="seg">
-          <button type="button" class="segbtn" data-filter="all" aria-pressed="true">すべて</button>
-          <button type="button" class="segbtn" data-filter="active" aria-pressed="false">未完了</button>
-          <button type="button" class="segbtn" data-filter="done" aria-pressed="false">完了</button>
-        </div>
-
-        <div class="grow">
-          <label class="sr" for="searchInput">検索</label>
-          <input id="searchInput" class="input" type="search" placeholder="検索…" />
-        </div>
-
-        <div class="col">
-          <label class="label" for="sortSelect">並び</label>
-          <select id="sortSelect" class="input">
-            <option value="due">期限が近い順</option>
-            <option value="created_desc">新しい順</option>
-            <option value="created_asc">古い順</option>
-          </select>
-        </div>
+      <div class="muted small" id="emptyHint" hidden>
+        ここにタスクが表示されます。
       </div>
-
-      <ul id="list" class="list" aria-label="タスク一覧"></ul>
-
-      <div class="footerbar">
-        <div class="left">
-          <span id="stats" class="muted"></span>
-        </div>
-
-        <div class="right">
-          <button id="exportBtn" type="button" class="button">書き出し(JSON)</button>
-
-          <label class="button filebtn" for="importFile">読み込み(JSON)</label>
-          <input id="importFile" class="file" type="file" accept="application/json" />
-
-          <button id="clearDoneBtn" type="button" class="button danger">完了を削除</button>
-        </div>
-      </div>
-
-      <p class="note">
-        ※ iPhoneで“アプリっぽく”使う：Safariで開く → 共有 →「ホーム画面に追加」。<br>
-        ※ 通知（締切で自動Push）や端末間の自動同期は、GitHub Pages単体では完結しないので次の段階で追加します。
-      </p>
     </section>
   </main>
+
+  <!-- bottom pinned -->
+  <div class="pinned" id="pinnedBar" hidden>
+    <label class="pinned__check">
+      <input type="checkbox" id="pinnedCheck" />
+    </label>
+
+    <div class="pinned__main">
+      <div class="pinned__title" id="pinnedTitle">---</div>
+      <div class="pinned__meta" id="pinnedMeta">---</div>
+    </div>
+
+    <button class="iconbtn" id="pinnedEditBtn" type="button" aria-label="編集">⋯</button>
+  </div>
+
+  <!-- MENU MODAL -->
+  <div class="overlay hidden" id="menuOverlay" aria-hidden="true">
+    <div class="sheet">
+      <div class="sheet__header">
+        <div class="sheet__title">メニュー</div>
+        <button class="iconbtn" type="button" data-close="menuOverlay" aria-label="閉じる">✕</button>
+      </div>
+
+      <div class="sheet__content">
+        <button class="menubtn" type="button" id="openSettingsBtn">設定</button>
+      </div>
+    </div>
+    <button class="overlay__bg" type="button" data-close="menuOverlay" aria-label="閉じる"></button>
+  </div>
+
+  <!-- TASK EDITOR -->
+  <div class="overlay hidden" id="taskOverlay" aria-hidden="true">
+    <div class="sheet sheet--tall">
+      <div class="sheet__header">
+        <div class="sheet__title" id="taskSheetTitle">タスク追加</div>
+        <button class="iconbtn" type="button" data-close="taskOverlay" aria-label="閉じる">✕</button>
+      </div>
+
+      <div class="sheet__content">
+        <form id="taskForm" autocomplete="off">
+          <div class="field">
+            <label class="label" for="taskTitle">概要</label>
+            <input class="input" id="taskTitle" type="text" maxlength="120" placeholder="例：トイレの掃除をする" required />
+          </div>
+
+          <div class="field">
+            <label class="label" for="taskMemo">メモ</label>
+            <textarea class="textarea" id="taskMemo" rows="4" placeholder="例：掃除用具は玄関にある"></textarea>
+          </div>
+
+          <div class="field">
+            <label class="label" for="taskKind">種別</label>
+            <select class="input" id="taskKind">
+              <option value="ONE_OFF">単発タスク</option>
+              <option value="RECURRING">常在タスク</option>
+            </select>
+          </div>
+
+          <div class="field" id="dueField">
+            <label class="label" for="taskDue">期限</label>
+            <input class="input" id="taskDue" type="datetime-local" />
+          </div>
+
+          <div class="field hidden" id="recurringField">
+            <label class="label" for="taskRecurringType">常在タスク</label>
+            <select class="input" id="taskRecurringType">
+              <option value="DAY">DAY</option>
+              <option value="WEEK">WEEK</option>
+              <option value="MONTH">MONTH</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="row">
+              <label class="label" for="taskGem">獲得ジェム（0〜100）</label>
+              <div class="row__right">
+                <input class="input input--mini" id="taskGemNumber" type="number" min="0" max="100" step="1" value="0" />
+              </div>
+            </div>
+            <input class="range" id="taskGem" type="range" min="0" max="100" step="1" value="0" />
+          </div>
+
+          <div class="row row--end">
+            <button class="btn btn--primary" type="submit" id="saveTaskBtn">保存</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <button class="btn btn--danger hidden" type="button" id="deleteTaskBtn">削除</button>
+          <div class="muted small hidden" id="recurringDeleteHint">
+            常在タスクの削除は「設定」から行います。
+          </div>
+        </form>
+      </div>
+    </div>
+    <button class="overlay__bg" type="button" data-close="taskOverlay" aria-label="閉じる"></button>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="overlay hidden" id="settingsOverlay" aria-hidden="true">
+    <div class="sheet sheet--tall">
+      <div class="sheet__header">
+        <div class="sheet__title">設定</div>
+        <button class="iconbtn" type="button" data-close="settingsOverlay" aria-label="閉じる">✕</button>
+      </div>
+
+      <div class="sheet__content">
+        <div class="sectiontitle">常在タスク（個別削除）</div>
+        <ul class="simplelist" id="recurringList"></ul>
+        <div class="muted small" id="recurringEmpty" hidden>常在タスクがありません。</div>
+      </div>
+    </div>
+    <button class="overlay__bg" type="button" data-close="settingsOverlay" aria-label="閉じる"></button>
+  </div>
+
+  <!-- COIN CALCULATOR -->
+  <div class="overlay hidden" id="coinOverlay" aria-hidden="true">
+    <div class="sheet sheet--tall">
+      <div class="sheet__header">
+        <div class="sheet__title">所持金を更新</div>
+        <button class="iconbtn" type="button" data-close="coinOverlay" aria-label="閉じる">✕</button>
+      </div>
+
+      <div class="sheet__content">
+        <div class="calc">
+          <div class="calc__display">
+            <div class="calc__label">現在</div>
+            <div class="calc__value" id="calcCurrent">0</div>
+
+            <div class="calc__label">更新後</div>
+            <div class="calc__value calc__value--big" id="calcPreview">0</div>
+
+            <div class="calc__label">入力</div>
+            <div class="calc__entry" id="calcEntry">0</div>
+          </div>
+
+          <div class="calc__grid">
+            <button class="calcbtn calcbtn--op" type="button" data-calc="add">＋</button>
+            <button class="calcbtn calcbtn--op" type="button" data-calc="sub">－</button>
+            <button class="calcbtn calcbtn--ok" type="button" data-calc="ok">✓</button>
+
+            <button class="calcbtn" type="button" data-digit="7">7</button>
+            <button class="calcbtn" type="button" data-digit="8">8</button>
+            <button class="calcbtn" type="button" data-digit="9">9</button>
+
+            <button class="calcbtn" type="button" data-digit="4">4</button>
+            <button class="calcbtn" type="button" data-digit="5">5</button>
+            <button class="calcbtn" type="button" data-digit="6">6</button>
+
+            <button class="calcbtn" type="button" data-digit="1">1</button>
+            <button class="calcbtn" type="button" data-digit="2">2</button>
+            <button class="calcbtn" type="button" data-digit="3">3</button>
+
+            <button class="calcbtn" type="button" data-calc="clear">C</button>
+            <button class="calcbtn" type="button" data-digit="0">0</button>
+            <button class="calcbtn" type="button" data-calc="back">⌫</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="overlay__bg" type="button" data-close="coinOverlay" aria-label="閉じる"></button>
+  </div>
 
   <script src="./app.js" defer></script>
 </body>
 </html>
-
